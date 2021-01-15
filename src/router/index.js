@@ -1,0 +1,66 @@
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import ListAsset from '../views/ListAsset.vue'
+import Asset from '../views/Asset.vue'
+import Register from '../views/Register.vue'
+import User from '../views/User'
+import Index from '../views/Index'
+import Login from '../views/Login'
+import App from '../App'
+Vue.use(VueRouter)
+
+const routes = [
+  {
+    path: '/',
+    component: Login,
+    // redirect: "/login",
+  },
+  {
+    path: '/page',
+    name: '资产管理',
+    component: Index,
+    show: true,
+    children:[
+      {
+        path: '/asset',
+        name: '资产查询',
+        component: Asset
+      },
+      {
+        path: '/listAsset',
+        name: '资产录入',
+        component: ListAsset
+      }
+    ]
+  },
+  {
+    path: '/page1',
+    name: '设置',
+    component: Index,
+    show:true,
+    children:[
+      {
+        path: '/listUser',
+        name: '用户列表',
+        component: User
+      },
+      {
+        path: '/register',
+        name: '新增用户',
+        component: Register
+      }
+    ]
+  },
+]
+
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes
+})
+
+export default router
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
