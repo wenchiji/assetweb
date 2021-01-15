@@ -54,17 +54,29 @@
                             .then(response => {
                                 this.loading = false;
                                 let code = response.data;
-                                if (code == 'success') {
+                                if(code.success === true){
+                                    /*存储到ls*/
+                                    localStorage.setItem('eleToken',token);
+                                    this.$router.push('/ListAsset');
+                                }else {
                                     this.$router.push({
-                                        path: "/asset"
-                                    });
-                                } else {
-                                    this.$router.push({
-                                        callback: action => {
+                                        callback: action =>{
                                             window.location.reload()
                                         }
                                     });
                                 }
+
+                                // if (code == 'success') {
+                                //     this.$router.push({
+                                //         path: "/asset"
+                                //     });
+                                // } else {
+                                //     this.$router.push({
+                                //         callback: action => {
+                                //             window.location.reload()
+                                //         }
+                                //     });
+                                // }
                             })
                             .catch(() => {
                                 this.loading = false;

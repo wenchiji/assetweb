@@ -15,3 +15,15 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount('#app')
+
+//请求拦截
+axios.interceptors.request.use(config => {
+  /*判断token存在   登录拦截*/
+  if(localStorage.eleToken){
+    /*设置统一的header*/
+    config.headers.Authorization  = localStorage.eleToken;
+  }
+  return config;
+},error => {
+  return Promise.reject(error);
+});

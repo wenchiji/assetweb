@@ -60,7 +60,18 @@ const router = new VueRouter({
 })
 
 export default router
+
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location) {
   return originalPush.call(this, location).catch(err => err)
 }
+
+/*路由守卫   根据登录获得token*/
+router.beforeEach((to,from,next) =>{
+  const isLogin = localStorage.eleToken ? true :false ;
+  if(to.path ==="/" || to.path ==="/register"){
+    next();
+  }else{
+    isLogin ? next() :next("/")   /*真跳转  假注册*/
+  }
+})
