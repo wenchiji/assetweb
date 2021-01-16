@@ -23,6 +23,9 @@ axios.interceptors.request.use(config => {
     /*设置统一的header*/
     config.headers.Authorization  = localStorage.eleToken;
   }
+  // if (localStorage.getItem('Authorization')) {
+  //   config.headers.Authorization = localStorage.getItem('Authorization');
+  // }
   return config;
 },error => {
   return Promise.reject(error);
