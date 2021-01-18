@@ -4,7 +4,7 @@
             <el-form autocomplete="on" :model="loginForm" ref="loginForm" :rules="rules" label-position="left">
                 <h2 class="login-title color-main">IT资产管理</h2>
                 <el-form-item prop="phone">
-                    <el-input type="text" v-model="loginForm.phone" autocomplete="on" placeholder="请输入用户名">
+                    <el-input type="text" v-model="loginForm.name" autocomplete="on" placeholder="请输入用户名">
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="password">
@@ -27,19 +27,19 @@
         data() {
             return {
                 loginForm: {
-                    phone:'',
+                    name:'',
                     password:''
                 },
                 loading: false,
                 pwdType: "password",
                 rules: {
-                    phone: [
+                    name: [
                         { required: true, message: '请输入账号', trigger: 'blur' },
                         { min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' }
                     ],
                     password: [
                         { required: true, message: '请输入登陆密码', trigger: 'blur' },
-                        { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+                        { min: 5, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
                     ],
                 }
             };
@@ -55,8 +55,9 @@
                                 this.loading = false;
                                 let code = response.data;
                                 if(code.success === true){
+                                    console.log(response.data.token)
                                     /*存储到ls*/
-                                    localStorage.setItem('eleToken',token);
+                                    // localStorage.setItem('eleToken',token);
                                     this.$router.push('/ListAsset');
                                 }else {
                                     this.$router.push({
@@ -65,18 +66,6 @@
                                         }
                                     });
                                 }
-
-                                // if (code == 'success') {
-                                //     this.$router.push({
-                                //         path: "/asset"
-                                //     });
-                                // } else {
-                                //     this.$router.push({
-                                //         callback: action => {
-                                //             window.location.reload()
-                                //         }
-                                //     });
-                                // }
                             })
                             .catch(() => {
                                 this.loading = false;

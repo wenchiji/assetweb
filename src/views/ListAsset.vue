@@ -6,7 +6,7 @@
     <el-input v-model="assetNumber" style="width: 20%" placeholder="请输入资产编号" @keyup.enter.native = "findByAssetNumber">根据资产编号查询</el-input>
     <br><br>
     <el-button @click="bathAddAsset" type="success"
-               :disabled="this.selectionList.length == 0">入库</el-button>
+               >入库</el-button>
     &nbsp
     <el-button @click="bathDeleteAsset" type="danger"
                :disabled="this.selectionList.length == 0">删除</el-button>
@@ -162,11 +162,24 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.post('http://localhost:8090/addAsset/?ids=' + ids)
-                  .then(response=>{
-                    response.data;
+          axios.post('http://localhost:8090/addAsset/?ids=' + ids).then(response=> {
+            axios.post('https://testqxflowprocess.37wan.com/api.php/taker/rouseInterface',
+                    {
+                      "data": {
+                        "type": "it_manager",
+                        "info": {
+                          "CGFK2020120400041000": "7323",
+                          "CGFK2020112500041009": "7343",
+                          "CGFK2020112500041008": ""
+                        }
+                      },
+                      "appId": "qHSYjTfnh3MhXqBmnaWk",
+                      "nonce": "xqg59ijt",
+                      "timestamp": response.data.time,
+                      "interfaceId": "203868a71f188ed965682ac5a904b469",
+                      "token": response.data.token
                     })
-
+          })
           this.$message({
             type: 'success',
             message: '入库成功!'
