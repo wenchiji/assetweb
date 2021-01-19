@@ -6,7 +6,7 @@
     <el-input v-model="assetNumber" style="width: 20%" placeholder="请输入资产编号" @keyup.enter.native = "findByAssetNumber">根据资产编号查询</el-input>
     <br><br>
     <el-button @click="bathAddAsset" type="success"
-               >入库</el-button>
+               :disabled="this.selectionList.length == 0">入库</el-button>
     &nbsp
     <el-button @click="bathDeleteAsset" type="danger"
                :disabled="this.selectionList.length == 0">删除</el-button>
@@ -22,7 +22,7 @@
       </el-table-column>
       <el-table-column prop="assetNumber" label="设备编号" width="180">
       </el-table-column>
-      <el-table-column prop="status" label="是否入库" width="180">
+      <el-table-column prop="status" width="180">
         <template slot="header" slot-scope="scope">
           <el-dropdown @command="listByStatus">
             <span class="el-dropdown-link">
@@ -60,7 +60,7 @@
       pageChange(currentPage){
         const that = this
         that.currentPage = currentPage;
-        that.listByStatus('否');
+        that.listByStatus("否");
         // that.getList(that)
       },
       //批量选择时触发
@@ -73,6 +73,20 @@
       //     that.total = response.data.totalElements
       //   })
       // },
+      listByStatus(command){
+        const that = this
+        axios.request({
+          url: 'http://localhost:8090/listByStatus',
+          params:{
+            status:command,
+            page:that.currentPage,
+            size:10
+          }
+        }).then((response) =>{
+          that.tableData = response.data.content
+          that.total = response.data.totalElements
+        })
+      },
       findByJobNumber(){
         let i = parseInt(this.jobNumber)
         const that = this
@@ -88,20 +102,6 @@
           this.total = response.data.totalElements
         })
       },
-      listByStatus(command){
-        const that = this
-        axios.request({
-          url: 'http://localhost:8090/listByStatus',
-          params:{
-            status:command,
-            page:that.currentPage,
-            size:10
-          }
-        }).then((response) =>{
-          that.tableData = response.data.content
-          that.total = response.data.totalElements
-        })
-      },
       deleteAsset(row){
         this.$confirm('此操作将永久删除所选中信息, 是否继续?', '提示', {
           confirmButtonText: '确定',
@@ -112,6 +112,12 @@
           this.$message({
             type: 'success',
             message: '删除成功!'
+          });
+          // this.$router.push(this.backPath);
+          this.$router.push({
+            callback: action =>{
+              window.location.reload()
+            }
           });
         }).catch(() => {
           this.$message({
@@ -144,10 +150,34 @@
           confirmButtonText: '确定',
           cancelButtonText: '取消',
         }).then(({ value }) => {
-          axios.post('http://localhost:8090/addAsset/?ids=' + row.id)
-          this.$message({
-            type: 'success'
-          });
+          axios.post('http://localhost:8090/addAsset/?ids=' + row.id).then(response=> {
+            axios.post('http://eicommon.37wan.com/api.php/taker/rouseInterface',
+                    {
+                      "data": {
+                        "type": "it_manager",
+                        "info": response.data.data
+                      },
+                      "appId": "qSymvYkZ4a2caQNVgKHG",
+                      "nonce": "zdq888ji",
+                      "timestamp": response.data.time,
+                      "interfaceId": "99f2ac375978e374557067455b855eab",
+                      "token": response.data.token
+                    }).then(response =>{
+              if(response.data.code === 1){
+                this.$message({
+                  type: 'success',
+                  message: '入库成功!'
+                })
+                axios.post('http://localhost:8090/updateAsset/?ids=' + row.id)
+              }else{
+                this.$confirm(response.data.msg, '入库失败', {
+                  confirmButtonText: '确定',
+                  type: 'warning'
+                })
+                // console.log(response.data.msg)
+              }
+            })
+          })
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -163,27 +193,38 @@
           type: 'warning'
         }).then(() => {
           axios.post('http://localhost:8090/addAsset/?ids=' + ids).then(response=> {
-            axios.post('https://testqxflowprocess.37wan.com/api.php/taker/rouseInterface',
+            axios.post('http://eicommon.37wan.com/api.php/taker/rouseInterface',
                     {
                       "data": {
                         "type": "it_manager",
-                        "info": {
-                          "CGFK2020120400041000": "7323",
-                          "CGFK2020112500041009": "7343",
-                          "CGFK2020112500041008": ""
-                        }
+                        "info": response.data.data
                       },
-                      "appId": "qHSYjTfnh3MhXqBmnaWk",
-                      "nonce": "xqg59ijt",
+                      "appId": "qSymvYkZ4a2caQNVgKHG",
+                      "nonce": "zdq888ji",
                       "timestamp": response.data.time,
-                      "interfaceId": "203868a71f188ed965682ac5a904b469",
+                      "interfaceId": "99f2ac375978e374557067455b855eab",
                       "token": response.data.token
-                    })
+                    }).then(response =>{
+                      if(response.data.code === 1){
+                        this.$message({
+                          type: 'success',
+                          message: '入库成功!'
+                        })
+                        axios.post('http://localhost:8090/updateAsset/?ids=' + ids)
+                        this.$router.push({
+                          callback: action =>{
+                            window.location.reload()
+                          }
+                        });
+                      }else{
+                        this.$confirm(response.data.msg, '入库失败', {
+                          confirmButtonText: '确定',
+                          type: 'warning'
+                        })
+                        // console.log(response.data.msg)
+                      }
+            })
           })
-          this.$message({
-            type: 'success',
-            message: '入库成功!'
-          });
         }).catch(() => {
           this.$message({
             type: 'info',
