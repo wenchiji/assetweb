@@ -39,7 +39,7 @@
                     ],
                     password: [
                         { required: true, message: '请输入登陆密码', trigger: 'blur' },
-                        { min: 5, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+                        { min: 5, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
                     ],
                 }
             };
@@ -55,9 +55,10 @@
                                 this.loading = false;
                                 let code = response.data;
                                 if(code.success === true){
-                                    console.log(response.data.token)
                                     /*存储到ls*/
-                                    // localStorage.setItem('eleToken',token);
+                                    localStorage.setItem('eleToken',code.token);
+                                    console.log('eleToken');
+                                    // this.$store.commit('eleToken',code.token)
                                     this.$router.push('/ListAsset');
                                 }else {
                                     this.$router.push({

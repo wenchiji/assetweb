@@ -38,6 +38,7 @@
       <el-table-column fixed="right" label="操作">
         <template slot-scope="scope">
           <el-button @click="addAssetToOA(scope.row)" type="info" size="small"icon="el-icon-upload">入库</el-button>
+          <el-button @click="updateAsset(scope.row)" type="info" size="small" icon="el-icon-edit">编辑</el-button>
           <el-button @click="deleteAsset(scope.row)" type="danger" size="small"icon="el-icon-delete">删除</el-button>
         </template>
       </el-table-column>
@@ -102,6 +103,9 @@
           this.total = response.data.totalElements
         })
       },
+      updateAsset(row){
+        dd
+      },
       deleteAsset(row){
         this.$confirm('此操作将永久删除所选中信息, 是否继续?', '提示', {
           confirmButtonText: '确定',
@@ -138,6 +142,7 @@
               type: 'success',
               message: '删除成功!'
             });
+          this.listByStatus("否");
           }).catch(() => {
             this.$message({
               type: 'info',
@@ -151,32 +156,45 @@
           cancelButtonText: '取消',
         }).then(({ value }) => {
           axios.post('http://localhost:8090/addAsset/?ids=' + row.id).then(response=> {
-            axios.post('http://eicommon.37wan.com/api.php/taker/rouseInterface',
-                    {
-                      "data": {
-                        "type": "it_manager",
-                        "info": response.data.data
-                      },
-                      "appId": "qSymvYkZ4a2caQNVgKHG",
-                      "nonce": "zdq888ji",
-                      "timestamp": response.data.time,
-                      "interfaceId": "99f2ac375978e374557067455b855eab",
-                      "token": response.data.token
-                    }).then(response =>{
-              if(response.data.code === 1){
-                this.$message({
-                  type: 'success',
-                  message: '入库成功!'
-                })
-                axios.post('http://localhost:8090/updateAsset/?ids=' + row.id)
-              }else{
-                this.$confirm(response.data.msg, '入库失败', {
-                  confirmButtonText: '确定',
-                  type: 'warning'
-                })
-                // console.log(response.data.msg)
-              }
-            })
+            // axios.post('http://eicommon.37wan.com/api.php/taker/rouseInterface',
+            //         {
+            //           "data": {
+            //             "type": "it_manager",
+            //             "info": response.data.data
+            //           },
+            //           "appId": "qSymvYkZ4a2caQNVgKHG",
+            //           "nonce": "zdq888ji",
+            //           "timestamp": response.data.time,
+            //           "interfaceId": "99f2ac375978e374557067455b855eab",
+            //           "token": response.data.tokenToOa
+            //         }).then(response =>{
+            //   if(response.data.code === 1){
+            //     this.$message({
+            //       type: 'success',
+            //       message: '入库成功!'
+            //     })
+            //     axios.post('http://localhost:8090/updateAsset/?ids=' + row.id)
+            //   }else{
+            //     this.$confirm(response.data.msg, '入库失败', {
+            //       confirmButtonText: '确定',
+            //       type: 'warning'
+            //     })
+            //     // console.log(response.data.msg)
+            //   }
+            // })
+            if(response.data.code === 1){
+              this.$message({
+                type: 'success',
+                message: '入库成功!'
+              })
+              axios.post('http://localhost:8090/updateAsset/?ids=' + row.id)
+            }else{
+              this.$confirm(response.data.msg, '入库失败', {
+                confirmButtonText: '确定',
+                type: 'warning'
+              })
+              // console.log(response.data.msg)
+            }
           })
         }).catch(() => {
           this.$message({
@@ -193,37 +211,50 @@
           type: 'warning'
         }).then(() => {
           axios.post('http://localhost:8090/addAsset/?ids=' + ids).then(response=> {
-            axios.post('http://eicommon.37wan.com/api.php/taker/rouseInterface',
-                    {
-                      "data": {
-                        "type": "it_manager",
-                        "info": response.data.data
-                      },
-                      "appId": "qSymvYkZ4a2caQNVgKHG",
-                      "nonce": "zdq888ji",
-                      "timestamp": response.data.time,
-                      "interfaceId": "99f2ac375978e374557067455b855eab",
-                      "token": response.data.token
-                    }).then(response =>{
-                      if(response.data.code === 1){
-                        this.$message({
-                          type: 'success',
-                          message: '入库成功!'
-                        })
-                        axios.post('http://localhost:8090/updateAsset/?ids=' + ids)
-                        this.$router.push({
-                          callback: action =>{
-                            window.location.reload()
-                          }
-                        });
-                      }else{
-                        this.$confirm(response.data.msg, '入库失败', {
-                          confirmButtonText: '确定',
-                          type: 'warning'
-                        })
-                        // console.log(response.data.msg)
-                      }
-            })
+            // axios.post('http://eicommon.37wan.com/api.php/taker/rouseInterface',
+            //         {
+            //           "data": {
+            //             "type": "it_manager",
+            //             "info": response.data.data
+            //           },
+            //           "appId": "qSymvYkZ4a2caQNVgKHG",
+            //           "nonce": "zdq888ji",
+            //           "timestamp": response.data.time,
+            //           "interfaceId": "99f2ac375978e374557067455b855eab",
+            //           "token": response.data.tokenToOa
+            //         }).then(response =>{
+            //           if(response.data.code === 1){
+            //             this.$message({
+            //               type: 'success',
+            //               message: '入库成功!'
+            //             })
+            //             axios.post('http://localhost:8090/updateAsset/?ids=' + ids)
+            //             this.$router.push({
+            //               callback: action =>{
+            //                 window.location.reload()
+            //               }
+            //             });
+            //           }else{
+            //             this.$confirm(response.data.msg, '入库失败', {
+            //               confirmButtonText: '确定',
+            //               type: 'warning'
+            //             })
+            //             // console.log(response.data.msg)
+            //           }
+            // })
+            if(response.data.code === 1){
+              this.$message({
+                type: 'success',
+                message: '入库成功!'
+              })
+              axios.post('http://localhost:8090/updateAsset/?ids=' + row.id)
+            }else{
+              this.$confirm(response.data.msg, '入库失败', {
+                confirmButtonText: '确定',
+                type: 'warning'
+              })
+              // console.log(response.data.msg)
+            }
           })
         }).catch(() => {
           this.$message({
