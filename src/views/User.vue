@@ -116,7 +116,6 @@
             },
             findById(row){
                 let user = axios.get('http://localhost:8090/findById?id='+row.id)
-                alert(user)
             },
             editUser() {
                 axios.post('http://localhost:8090/updateUser',this.ruleForm).then((response)=>{

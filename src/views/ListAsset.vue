@@ -247,7 +247,7 @@
                 type: 'success',
                 message: '入库成功!'
               })
-              axios.post('http://localhost:8090/updateAsset/?ids=' + row.id)
+              axios.post('http://localhost:8090/updateAsset/?ids=' + ids)
             }else{
               this.$confirm(response.data.msg, '入库失败', {
                 confirmButtonText: '确定',
