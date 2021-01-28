@@ -113,11 +113,12 @@
           type: 'warning'
         }).then(() => {
           axios.delete('http://localhost:8090/deleteAsset/?id='+row.id)
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
+          this.$alert('删除成功!','提示', {
+            confirmButtonText: '确定',
+            callback: action => {
+              window.location.reload()
+            }
           });
-          // this.$router.push(this.backPath);
           this.$router.push({
             callback: action =>{
               window.location.reload()
@@ -138,10 +139,12 @@
           type: 'warning'
         }).then(() => {
           axios.post('http://localhost:8090/bathDeleteAsset/?assetIds=' + assetIds)
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            });
+          this.$alert('删除成功!','提示', {
+            confirmButtonText: '确定',
+            callback: action => {
+              window.location.reload()
+            }
+          });
           this.listByStatus("否");
           }).catch(() => {
             this.$message({
@@ -183,10 +186,16 @@
             //   }
             // })
             if(response.data.code === 1){
-              this.$message({
-                type: 'success',
-                message: '入库成功!'
-              })
+              // this.$message({
+              //   type: 'success',
+              //   message: '入库成功!'
+              // })
+              this.$alert('入库成功!','提示', {
+                confirmButtonText: '确定',
+                callback: action => {
+                  window.location.reload()
+                }
+              });
               axios.post('http://localhost:8090/updateAsset/?ids=' + row.id)
             }else{
               this.$confirm(response.data.msg, '入库失败', {
@@ -211,42 +220,17 @@
           type: 'warning'
         }).then(() => {
           axios.post('http://localhost:8090/addAsset/?ids=' + ids).then(response=> {
-            // axios.post('http://eicommon.37wan.com/api.php/taker/rouseInterface',
-            //         {
-            //           "data": {
-            //             "type": "it_manager",
-            //             "info": response.data.data
-            //           },
-            //           "appId": "qSymvYkZ4a2caQNVgKHG",
-            //           "nonce": "zdq888ji",
-            //           "timestamp": response.data.time,
-            //           "interfaceId": "99f2ac375978e374557067455b855eab",
-            //           "token": response.data.tokenToOa
-            //         }).then(response =>{
-            //           if(response.data.code === 1){
-            //             this.$message({
-            //               type: 'success',
-            //               message: '入库成功!'
-            //             })
-            //             axios.post('http://localhost:8090/updateAsset/?ids=' + ids)
-            //             this.$router.push({
-            //               callback: action =>{
-            //                 window.location.reload()
-            //               }
-            //             });
-            //           }else{
-            //             this.$confirm(response.data.msg, '入库失败', {
-            //               confirmButtonText: '确定',
-            //               type: 'warning'
-            //             })
-            //             // console.log(response.data.msg)
-            //           }
-            // })
             if(response.data.code === 1){
-              this.$message({
-                type: 'success',
-                message: '入库成功!'
-              })
+              // this.$message({
+              //   type: 'success',
+              //   message: '入库成功!'
+              // })
+              this.$alert('入库成功!','提示', {
+                confirmButtonText: '确定',
+                callback: action => {
+                  window.location.reload()
+                }
+              });
               axios.post('http://localhost:8090/updateAsset/?ids=' + ids)
             }else{
               this.$confirm(response.data.msg, '入库失败', {

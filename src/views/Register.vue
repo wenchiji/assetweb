@@ -32,15 +32,15 @@
                 rules: {
                     name: [
                         { required: true, message: '用户名称不能为空', trigger: 'blur' },
-                        { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+                        { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
                     ],
                     phone: [
                         { required: true, message: '请输入联系电话', trigger: 'blur' },
-                        { min: 3, max: 5, message: '长度为11个字符', trigger: 'blur' }
+                        { min: 11, max: 11, message: '长度为11个字符', trigger: 'blur' }
                     ],
                     password: [
                         { required: true, message: '请输入登陆密码', trigger: 'blur' },
-                        { min: 3, max: 5, message: '长度在 6 到 11 个字符', trigger: 'blur' }
+                        { min: 6, max: 11, message: '长度在 6 到 11 个字符', trigger: 'blur' }
                     ],
                 }
             };
@@ -51,12 +51,10 @@
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         axios.post('http://localhost:8090/register',this.ruleForm).then(function(response){
-                            if(response.data == 'success'){
-                                // this.$message('用户添加成功！')
+                            if(response.data.success === true){
                                 this1.$alert('用户 '+this1.ruleForm.name+' 添加成功!','提示', {
                                     confirmButtonText: '确定',
                                     callback: action => {
-                                        // this1.$router.push('/listUser')
                                         window.location.reload()
                                     }
                                 });

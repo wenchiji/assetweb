@@ -1,5 +1,5 @@
 <template>
-    <div class="login-container">
+    <div class="login-container" >
         <el-card class="login-form-layout">
             <el-form autocomplete="on" :model="loginForm" ref="loginForm" :rules="rules" label-position="left">
                 <h2 class="login-title color-main">IT资产管理</h2>
@@ -12,9 +12,13 @@
                               @keyup.enter.native="handleLogin">
                     </el-input>
                 </el-form-item>
-                <el-form-item style="margin-bottom: 60px">
+                <el-form-item style="margin-bottom: 10px">
                     <el-button style="width: 100%" type="primary"
                                :loading="loading" @click="handleLogin('loginForm')">登录</el-button>
+                </el-form-item>
+                <el-form-item style="margin-bottom: 50px">
+                    <el-button style="width: 100%" type="primary"
+                               :loading="loading" @click="register()">注册</el-button>
                 </el-form-item>
             </el-form>
         </el-card>
@@ -74,6 +78,14 @@
                     } else {
                         console.log("参数验证不合法！");
                         return false;
+                    }
+                });
+            },
+            register(){
+                this.$alert('企业微信联系-温炽基!','提示', {
+                    confirmButtonText: '确定',
+                    callback: action => {
+                        window.location.reload()
                     }
                 });
             }

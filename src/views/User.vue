@@ -1,10 +1,11 @@
 <template>
     <div>
         查询：
-        <el-input @keyup.enter.native="findByName" v-model="input" style="width: 20%" placeholder="请输入姓名"></el-input>
+        <el-input @keyup.enter.native="findByName" v-model="username" style="width: 20%" placeholder="请输入姓名"></el-input>
         &nbsp
         <el-button type="danger" icon="el-icon-delete" @click="bathDeleteUser(selectionList)"
                    :disabled="this.selectionList.length === 0">批量删除</el-button>
+<!--        <el-button @click="register" type="success">新增用户</el-button>-->
         <br><br>
         <el-table :data="tableData" border style="width: 100%" @selection-change="selectionChange">
             <el-table-column type="selection" width="55">
@@ -63,10 +64,11 @@
     export default {
         methods: {
             findByName(){
-                let str = this.input
+                let str = this.username
                 axios.get('http://localhost:8090/findByName?name='+str).then(response => {
-                        this.tableData = response.data
-                    })
+                    this.tableData = response.data
+                    this.total = response.data.totalElements
+                })
             },
             //批量选择时触发
             selectionChange(val){
@@ -83,9 +85,11 @@
                 }).then(() => {
                     // 发送删除请求
                     this.$axios.post('http://localhost:8090/bathDeleteUser/?userIds='+userIds)
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
+                    this.$alert('删除成功!','提示', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                            window.location.reload()
+                        }
                     });
                 }).catch((e) => {
                     console.log(e.message);
@@ -102,9 +106,11 @@
                     type: 'warning'
                 }).then(() => {
                     this.$axios.delete('http://localhost:8090/deleteUser?id='+row.id)
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
+                    this.$alert('删除成功!','提示', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                            window.location.reload()
+                        }
                     });
                 }).catch((e) => {
                     console.log(e.message);
@@ -138,7 +144,7 @@
                 that.getList(that);
             },
             getList(that){
-                axios.get('http://localhost:8090/listAll/'+that.currentPage+'/5').then(function (response) {
+                axios.get('http://localhost:8090/listAll/'+that.currentPage+'/10').then(function (response) {
                     that.tableData = response.data.content
                     that.total = response.data.totalElements
                 })
@@ -151,9 +157,10 @@
         data() {
             return {
                 input:'',
+                username:'',
                 //批量删除选中id
                 selectionList:[],
-                pageSize: 5,
+                pageSize: 10,
                 total: 0,
                 tableData: [],
                 currentPage: 1,

@@ -5,7 +5,6 @@
     根据资产编号查询：
     <el-input v-model="input" style="width: 20%" placeholder="请输入资产编号">根据资产编号查询</el-input>
     <br><br>
-    <el-button type="danger">删除</el-button>
     <br><br>
     <el-table
             :data="tableData"
@@ -15,11 +14,24 @@
       </el-table-column>
       <el-table-column fixed type="index" label="序号" width="100">
       </el-table-column>
-      <el-table-column prop="jobId" label="工号" width="150">
+      <el-table-column prop="jobNumber" label="工号" width="150">
       </el-table-column>
-      <el-table-column prop="assetType" label="资产类型" width="180">
+      <el-table-column prop="deviceName" label="资产类型" width="180">
       </el-table-column>
       <el-table-column prop="assetNumber" label="设备编号" width="180">
+      </el-table-column>
+      <el-table-column prop="status" width="180">
+        <template slot="header" slot-scope="scope">
+          <el-dropdown @command="listByStatus">
+            <span class="el-dropdown-link">
+              是否入库<i class="el-icon-arrow-down el-icon--right"></i>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="是">是</el-dropdown-item>
+              <el-dropdown-item command="否">否</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作">
         <template slot-scope="scope">
@@ -68,7 +80,7 @@
         that.getList(that);
       },
       getList(that){
-        axios.get('http://localhost:8090/listAsset/'+that.currentPage+'/5').then(function (response) {
+        axios.get('http://localhost:8090/listAsset/'+that.currentPage+'/10').then(function (response) {
           that.tableData = response.data.content
           that.total = response.data.totalElements
         })
