@@ -22,7 +22,7 @@
             </el-table-column>
             <el-table-column fixed="right" label="操作">
                 <template slot-scope="scope">
-                    <el-button @click="findById(scope.row),dialogFormVisible = true" type="info" size="small" icon="el-icon-edit">编辑</el-button>
+                    <el-button @click="handerEdit(scope.$index,scope.row)" size="small">编辑</el-button>
                     <el-button @click="deleteUser(scope.row)" type="danger" size="small" icon="el-icon-delete">删除</el-button>
                 </template>
             </el-table-column>
@@ -35,26 +35,26 @@
                 :current-page="currentPage"
                 @current-change="pageChange">
         </el-pagination>
-        <!-- ’编辑‘弹出框-->
-        <el-dialog style="width: 100%" title="编辑用户信息" :visible.sync="dialogFormVisible">
-            <el-form :model="ruleForm">
-                <el-form-item style="width: 80%" label="用户编号" :label-width="formLabelWidth" >
-                    <el-input v-model="ruleForm.id" ></el-input>
+        <!-- ’编辑‘弹框界面-->
+        <el-dialog :visible.sync="dialogFormVisible" :close-on-click-modal="false" style="width: 100%" title="编辑用户信息" >
+            <el-form :model="editForm" ref="editForm">
+                <el-form-item style="width: 80%" label="用户编号" prop="id" >
+                    <el-input v-model="editForm.id" ></el-input>
                 </el-form-item>
-                <el-form-item style="width: 80%" label="用户姓名" :label-width="formLabelWidth">
-                    <el-input v-model="ruleForm.name" autocomplete="off" ></el-input>
+                <el-form-item style="width: 80%" label="用户姓名">
+                    <el-input v-model="editForm.name" ></el-input>
                 </el-form-item>
-                <el-form-item style="width: 80%" label="电话" prop="phone" :label-width="formLabelWidth">
-                    <el-input v-model="ruleForm.phone" autocomplete="off"></el-input>
+                <el-form-item style="width: 80%" label="电话" prop="phone" >
+                    <el-input v-model="editForm.phone"></el-input>
                 </el-form-item>
-                <el-form-item style="width: 80%" label="密码" prop="password" :label-width="formLabelWidth">
-                    <el-input v-model="ruleForm.password" autocomplete="off"></el-input>
+                <el-form-item style="width: 80%" label="密码" prop="password" >
+                    <el-input v-model="editForm.password"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button @click="resetForm('ruleForm')">重置</el-button>
-                <el-button type="primary" @click="editUser('ruleForm')">确 定</el-button>
+                <el-button @click="resetForm('editForm')">重置</el-button>
+                <el-button type="primary" @click="updateUser">确 定</el-button>
             </div>
         </el-dialog>
     </div>
@@ -62,10 +62,11 @@
 
 <script>
     export default {
+        inject: ['reload'], //依赖注入
         methods: {
             findByName(){
                 let str = this.username
-                axios.get('http://localhost:8090/findByName?name='+str).then(response => {
+                axios.get(this.baseUrl+'/findByName?name='+str).then(response => {
                     this.tableData = response.data
                     this.total = response.data.totalElements
                 })
@@ -84,11 +85,11 @@
                     type: 'warning'
                 }).then(() => {
                     // 发送删除请求
-                    this.$axios.post('http://localhost:8090/bathDeleteUser/?userIds='+userIds)
+                    this.$axios.post(this.baseUrl+'/bathDeleteUser/?userIds='+userIds)
                     this.$alert('删除成功!','提示', {
                         confirmButtonText: '确定',
                         callback: action => {
-                            window.location.reload()
+                            this.reload();
                         }
                     });
                 }).catch((e) => {
@@ -105,11 +106,11 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.$axios.delete('http://localhost:8090/deleteUser?id='+row.id)
+                    this.$axios.delete(this.baseUrl+'/deleteUser?id='+row.id)
                     this.$alert('删除成功!','提示', {
                         confirmButtonText: '确定',
                         callback: action => {
-                            window.location.reload()
+                            this.reload();
                         }
                     });
                 }).catch((e) => {
@@ -121,15 +122,21 @@
                 });
             },
             findById(row){
-                let user = axios.get('http://localhost:8090/findById?id='+row.id)
+                let user = axios.get(this.baseUrl+'/findById?id='+row.id)
             },
-            editUser() {
-                axios.post('http://localhost:8090/updateUser',this.ruleForm).then((response)=>{
+            //显示编辑页面
+            handerEdit: function(index,row){
+                this.dialogFormVisible = true;
+                this.editForm = Object.assign({},row);
+            },
+            updateUser() {
+                let para = Object.assign({},this.editForm);
+                axios.post(this.baseUrl+'/updateUser',para).then((response)=>{
                     if(response.data == 'success'){
-                        this.$alert('用户 '+this.ruleForm.name+' 信息修改成功!','提示', {
+                        this.$alert('用户 '+this.editForm.name+' 信息修改成功!','提示', {
                             confirmButtonText: '确定',
                             callback: action => {
-                                this.$router.go()
+                                this.reload();
                             }
                         });
                     }
@@ -144,7 +151,7 @@
                 that.getList(that);
             },
             getList(that){
-                axios.get('http://localhost:8090/listAll/'+that.currentPage+'/10').then(function (response) {
+                axios.get(this.baseUrl+'/listAll/'+that.currentPage+'/10').then(function (response) {
                     that.tableData = response.data.content
                     that.total = response.data.totalElements
                 })
@@ -156,6 +163,7 @@
         },
         data() {
             return {
+                baseUrl: 'http://10.2.10.22:8090',
                 input:'',
                 username:'',
                 //批量删除选中id
@@ -172,7 +180,7 @@
                     password:''
                 },
                 formLabelWidth: '100px',
-                ruleForm: {
+                editForm: {
                     id:'',
                     name: '',
                     phone: '',

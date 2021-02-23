@@ -23,7 +23,7 @@
 <!--                    <el-button @click="logout">退出</el-button>-->
                 </el-header>
                 <el-main>
-                    <router-view></router-view>
+                    <router-view v-if="isRouterAlive"></router-view>
                 </el-main>
             </el-container>
         </el-container>
@@ -33,8 +33,23 @@
 <script>
     export default {
         name: "index",
+        provide(){
+            return{
+                reload: this.reload
+            }
+        },
+        data() {
+            return {
+                isRouterAlive: true
+            };
+        },
         methods:{
-
+            reload() {
+                this.isRouterAlive = false;
+                this.$nextTick(function () {
+                    this.isRouterAlive = true;
+                });
+            },
             logout(){
                 localStorage.removeItem('eleToken');
                 localStorage.removeItem('user');

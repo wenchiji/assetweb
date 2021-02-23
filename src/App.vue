@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <el-main>
-      <router-view></router-view>
+      <router-view v-if="isRouterAlive"></router-view>
     </el-main>
   </div>
 </template>
@@ -21,14 +21,29 @@
 
 <script>
   export default {
-    data() {
-      const item = {
-        date: '',
-        name: '',
-        address: ''
-      };
+    name: 'app',
+    provide() {
       return {
-        tableData: Array(20).fill(item)
+        reload: this.reload,
+      }
+    },
+    data() {
+      // const item = {
+      //   date: '',
+      //   name: '',
+      //   address: ''
+      // };
+      return {
+        // tableData: Array(20).fill(item),
+        isRouterAlive: true
+      }
+    },
+    methods: {
+      reload() {
+        this.isRouterAlive = false;
+        this.$nextTick(function () {
+          this.isRouterAlive = true;
+        });
       }
     }
   };

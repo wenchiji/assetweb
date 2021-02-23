@@ -27,6 +27,7 @@
 
 <script>
     export default {
+        inject: ['reload'], //依赖注入
         name: "login",
         data() {
             return {
@@ -43,7 +44,7 @@
                     ],
                     password: [
                         { required: true, message: '请输入登陆密码', trigger: 'blur' },
-                        { min: 5, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
+                        { min: 5, max: 15, message: '长度在 5 到 15 个字符', trigger: 'blur' }
                     ],
                 }
             };
@@ -54,7 +55,7 @@
                     // console.log(valid) 验证通过为true，有一个不通过就是false
                     if (valid) {
                         this.loading = true;
-                        axios.post('http://localhost:8090/login',this.loginForm)
+                        axios.post('http://10.2.10.22:8090/login',this.loginForm)
                             .then(response => {
                                 this.loading = false;
                                 let code = response.data;
@@ -62,12 +63,13 @@
                                     /*存储到ls*/
                                     localStorage.setItem('eleToken',code.token);
                                     console.log('eleToken');
-                                    // this.$store.commit('eleToken',code.token)
                                     this.$router.push('/ListAsset');
                                 }else {
-                                    this.$router.push({
-                                        callback: action =>{
-                                            window.location.reload()
+                                    this.$alert('用户名或密码错误!','提示', {
+                                        confirmButtonText: '确定',
+                                        callback: action => {
+                                            this.reload();
+                                            // window.location.reload()
                                         }
                                     });
                                 }
@@ -85,7 +87,8 @@
                 this.$alert('企业微信联系-温炽基!','提示', {
                     confirmButtonText: '确定',
                     callback: action => {
-                        window.location.reload()
+                        this.reload();
+                        // window.location.reload()
                     }
                 });
             }

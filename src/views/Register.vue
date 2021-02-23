@@ -22,6 +22,7 @@
 </style>
 <script>
     export default {
+        inject: ['reload'], //依赖注入
         data() {
             return {
                 ruleForm: {
@@ -50,18 +51,18 @@
                 const this1 = this
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        axios.post('http://localhost:8090/register',this.ruleForm).then(function(response){
+                        axios.post('http://10.2.10.22:8090/register',this.ruleForm).then(function(response){
                             if(response.data.success === true){
                                 this1.$alert('用户 '+this1.ruleForm.name+' 添加成功!','提示', {
                                     confirmButtonText: '确定',
                                     callback: action => {
-                                        window.location.reload()
+                                        this.reload();
                                     }
                                 });
                             }
                         })
                     } else {
-                        console.log('error submit!!');
+                        console.log('用户添加失败!!');
                         return false;
                     }
                 });

@@ -38,7 +38,7 @@
       <el-table-column fixed="right" label="操作">
         <template slot-scope="scope">
           <el-button @click="addAssetToOA(scope.row)" type="info" size="small"icon="el-icon-upload">入库</el-button>
-          <el-button @click="updateAsset(scope.row)" type="info" size="small" icon="el-icon-edit">编辑</el-button>
+          <el-button @click="handleEdit(scope.$index,scope.row)" type="info" size="small" icon="el-icon-edit">编辑</el-button>
           <el-button @click="deleteAsset(scope.row)" type="danger" size="small"icon="el-icon-delete">删除</el-button>
         </template>
       </el-table-column>
@@ -51,12 +51,38 @@
             :current-page="currentPage"
             @current-change="pageChange">
     </el-pagination>
+    <!-- ’编辑‘弹框界面-->
+    <el-dialog :visible.sync="dialogFormVisible" :close-on-click-modal="false" style="width: 100%" title="编辑资产信息" >
+      <el-form :model="editForm" ref="editForm">
+        <el-form-item style="width: 80%" label="资产id" prop="id" >
+          <el-input v-model="editForm.id" ></el-input>
+        </el-form-item>
+        <el-form-item style="width: 80%" label="工号">
+          <el-input v-model="editForm.jobNumber" ></el-input>
+        </el-form-item>
+        <el-form-item style="width: 80%" label="设备名称" >
+          <el-input v-model="editForm.deviceName"></el-input>
+        </el-form-item>
+        <el-form-item style="width: 80%" label="设备编号" >
+          <el-input v-model="editForm.assetNumber"></el-input>
+        </el-form-item>
+        <el-form-item style="width: 80%" label="是否入库" >
+          <el-input v-model="editForm.status"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button @click="resetForm('editForm')">重置</el-button>
+        <el-button type="primary" @click="updateAsset">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 
 </template>
 
 <script>
   export default {
+    inject: ['reload'], //依赖注入
     methods: {
       pageChange(currentPage){
         const that = this
@@ -77,7 +103,7 @@
       listByStatus(command){
         const that = this
         axios.request({
-          url: 'http://localhost:8090/listByStatus',
+          url: this.baseUrl+'/listByStatus',
           params:{
             status:command,
             page:that.currentPage,
@@ -91,20 +117,37 @@
       findByJobNumber(){
         let i = parseInt(this.jobNumber)
         const that = this
-        axios.get('http://localhost:8090/findByJobNumber?jobNumber='+i).then((response)=>{
+        axios.get(this.baseUrl+'/findByJobNumber?jobNumber='+i).then((response)=>{
           that.tableData = response.data
           that.total = response.data.totalElements
         })
       },
       findByAssetNumber(){
         let str = this.assetNumber
-        axios.get('http://localhost:8090/findByAssetNumber?assetNumber='+str).then((response)=>{
+        axios.get(this.baseUrl+'/findByAssetNumber?assetNumber='+str).then((response)=>{
           this.tableData = response.data
           this.total = response.data.totalElements
         })
       },
-      updateAsset(row){
-        dd
+      handleEdit(index,row){
+        this.dialogFormVisible = true;
+        this.editForm = Object.assign({},row);
+      },
+      updateAsset(){
+        let para = Object.assign({},this.editForm);
+        axios.post(this.baseUrl+'/updateAsset',para).then((response)=>{
+          if(response.data.success == true){
+            this.$alert('资产信息修改成功!','提示', {
+              confirmButtonText: '确定',
+              callback: action => {
+                this.reload();
+              }
+            });
+          }
+        })
+      },
+      resetForm(formName) {
+        this.$refs[formName].resetFields();
       },
       deleteAsset(row){
         this.$confirm('此操作将永久删除所选中信息, 是否继续?', '提示', {
@@ -112,16 +155,11 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.delete('http://localhost:8090/deleteAsset/?id='+row.id)
+          axios.delete(this.baseUrl+'/deleteAsset/?id='+row.id)
           this.$alert('删除成功!','提示', {
             confirmButtonText: '确定',
             callback: action => {
-              window.location.reload()
-            }
-          });
-          this.$router.push({
-            callback: action =>{
-              window.location.reload()
+              this.reload();
             }
           });
         }).catch(() => {
@@ -138,11 +176,12 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.post('http://localhost:8090/bathDeleteAsset/?assetIds=' + assetIds)
+          axios.post(this.baseUrl+'/bathDeleteAsset/?assetIds=' + assetIds)
           this.$alert('删除成功!','提示', {
             confirmButtonText: '确定',
             callback: action => {
-              window.location.reload()
+              this.reload(); //调用注入的方法达到刷新router-view的目的
+              // window.location.reload()
             }
           });
           this.listByStatus("否");
@@ -158,33 +197,7 @@
           confirmButtonText: '确定',
           cancelButtonText: '取消',
         }).then(({ value }) => {
-          axios.post('http://localhost:8090/addAsset/?ids=' + row.id).then(response=> {
-            // axios.post('http://eicommon.37wan.com/api.php/taker/rouseInterface',
-            //         {
-            //           "data": {
-            //             "type": "it_manager",
-            //             "info": response.data.data
-            //           },
-            //           "appId": "qSymvYkZ4a2caQNVgKHG",
-            //           "nonce": "zdq888ji",
-            //           "timestamp": response.data.time,
-            //           "interfaceId": "99f2ac375978e374557067455b855eab",
-            //           "token": response.data.tokenToOa
-            //         }).then(response =>{
-            //   if(response.data.code === 1){
-            //     this.$message({
-            //       type: 'success',
-            //       message: '入库成功!'
-            //     })
-            //     axios.post('http://localhost:8090/updateAsset/?ids=' + row.id)
-            //   }else{
-            //     this.$confirm(response.data.msg, '入库失败', {
-            //       confirmButtonText: '确定',
-            //       type: 'warning'
-            //     })
-            //     // console.log(response.data.msg)
-            //   }
-            // })
+          axios.post(this.baseUrl+'/addAsset/?ids=' + row.id).then(response=> {
             if(response.data.code === 1){
               // this.$message({
               //   type: 'success',
@@ -193,10 +206,11 @@
               this.$alert('入库成功!','提示', {
                 confirmButtonText: '确定',
                 callback: action => {
-                  window.location.reload()
+                  this.reload(); //调用注入的方法达到刷新router-view的目的
+                  // window.location.reload()
                 }
               });
-              axios.post('http://localhost:8090/updateAsset/?ids=' + row.id)
+              axios.post(this.baseUrl+'/updateAssetStatus/?ids=' + row.id)
             }else{
               this.$confirm(response.data.msg, '入库失败', {
                 confirmButtonText: '确定',
@@ -219,7 +233,7 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.post('http://localhost:8090/addAsset/?ids=' + ids).then(response=> {
+          axios.post(this.baseUrl+'/addAsset/?ids=' + ids).then(response=> {
             if(response.data.code === 1){
               // this.$message({
               //   type: 'success',
@@ -228,10 +242,11 @@
               this.$alert('入库成功!','提示', {
                 confirmButtonText: '确定',
                 callback: action => {
-                  window.location.reload()
+                  this.reload(); //调用注入的方法达到刷新router-view的目的
+                  // window.location.reload()
                 }
               });
-              axios.post('http://localhost:8090/updateAsset/?ids=' + ids)
+              axios.post(this.baseUrl+'/updateAssetStatus/?ids=' + ids)
             }else{
               this.$confirm(response.data.msg, '入库失败', {
                 confirmButtonText: '确定',
@@ -255,6 +270,7 @@
     },
     data() {
       return {
+        baseUrl: 'http://10.2.10.22:8090',
         input:'',
         jobNumber:'',
         assetNumber:'',
@@ -263,7 +279,15 @@
         total: 0,
         tableData: [],
         currentPage: 1,
-        checked: true
+        checked: true,
+        dialogFormVisible: false,
+        editForm: {
+            id:'',
+            jobNumber:'',
+            deviceName: '',
+            assetNumber:'',
+            status: ''
+        },
       }
     }
   }
