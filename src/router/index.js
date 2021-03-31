@@ -47,11 +47,6 @@ const routes = [
         path: '/listUser',
         name: '用户列表',
         component: User
-      },
-      {
-        path: '/register',
-        name: '新增用户',
-        component: Register
       }
     ]
   },

@@ -89,30 +89,25 @@
         this.selectionList = val
       },
       getList(that){
-        axios.get(this.baseUrl+'/listAsset/'+that.currentPage+'/10').then(function (response) {
-          that.tableData = response.data.content
-          that.total = response.data.totalElements
-        })
-      },
-      listByStatus(command){
-        const that = this
-        axios.request({
-          url: this.baseUrl+'/listByStatus',
-          params:{
-            status:command,
-            page:that.currentPage,
-            size:10
+        axios.get(this.baseUrl+'/allAsset/listAsset/', {
+          params: {
+            page: that.currentPage,
+            pagesize: that.pageSize
           }
-        }).then((response) =>{
-          that.tableData = response.data.content
+        }).then(function (response) {
+          that.tableData = response.data.assetList
           that.total = response.data.totalElements
         })
       },
       findByJobNumber(){
         let i = parseInt(this.jobNumber)
         const that = this
-        axios.get(this.baseUrl+'/findByJobNumber?jobNumber='+i).then((response)=>{
-          that.tableData = response.data
+        axios.get(this.baseUrl+'/allAsset/findByJobNumber/',{
+          params:{
+            jobNumber: i
+          }
+        }).then((response)=>{
+          that.tableData = response.data.content
           that.total = response.data.totalElements
         })
       },
@@ -186,76 +181,6 @@
           });
         });
       },
-      addAssetToOA(row){
-        this.$confirm('确认录入系统', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-        }).then(({ value }) => {
-          axios.post(this.baseUrl+'/addAsset/?ids=' + row.id).then(response=> {
-            if(response.data.code === 1){
-              // this.$message({
-              //   type: 'success',
-              //   message: '入库成功!'
-              // })
-              this.$alert('入库成功!','提示', {
-                confirmButtonText: '确定',
-                callback: action => {
-                  this.reload(); //调用注入的方法达到刷新router-view的目的
-                  // window.location.reload()
-                }
-              });
-              axios.post(this.baseUrl+'/updateAssetStatus/?ids=' + row.id)
-            }else{
-              this.$confirm(response.data.msg, '入库失败', {
-                confirmButtonText: '确定',
-                type: 'warning'
-              })
-              // console.log(response.data.msg)
-            }
-          })
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '取消入库'
-          });
-        });
-      },
-      bathAddAsset(){
-        let ids = this.selectionList.map(item => item.id).join()
-        this.$confirm('此操作将所选中信息入库, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          axios.post(this.baseUrl+'/addAsset/?ids=' + ids).then(response=> {
-            if(response.data.code === 1){
-              // this.$message({
-              //   type: 'success',
-              //   message: '入库成功!'
-              // })
-              this.$alert('入库成功!','提示', {
-                confirmButtonText: '确定',
-                callback: action => {
-                  this.reload(); //调用注入的方法达到刷新router-view的目的
-                  // window.location.reload()
-                }
-              });
-              axios.post(this.baseUrl+'/updateAssetStatus/?ids=' + ids)
-            }else{
-              this.$confirm(response.data.msg, '入库失败', {
-                confirmButtonText: '确定',
-                type: 'warning'
-              })
-              // console.log(response.data.msg)
-            }
-          })
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消入库'
-          });
-        });
-      },
     },
     created() {
       const this1 = this
@@ -264,7 +189,7 @@
     },
     data() {
       return {
-        baseUrl: 'http://10.2.10.22:8090',
+        baseUrl: 'http://127.0.0.1:8000/itaim',
         input:'',
         jobNumber:'',
         assetNumber:'',

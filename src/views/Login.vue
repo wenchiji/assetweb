@@ -3,8 +3,8 @@
         <el-card class="login-form-layout">
             <el-form autocomplete="on" :model="loginForm" ref="loginForm" :rules="rules" label-position="left">
                 <h2 class="login-title color-main">IT资产管理</h2>
-                <el-form-item prop="phone">
-                    <el-input type="text" v-model="loginForm.name" autocomplete="on" placeholder="请输入用户名">
+                <el-form-item prop="username">
+                    <el-input type="text" v-model="loginForm.username" autocomplete="on" placeholder="请输入用户名">
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="password">
@@ -28,11 +28,11 @@
 <script>
     export default {
         inject: ['reload'], //依赖注入
-        name: "login",
+        username: "login",
         data() {
             return {
                 loginForm: {
-                    name:'',
+                    username:'',
                     password:''
                 },
                 loading: false,
@@ -55,21 +55,23 @@
                     // console.log(valid) 验证通过为true，有一个不通过就是false
                     if (valid) {
                         this.loading = true;
-                        axios.post('http://10.2.10.22:8090/login',this.loginForm)
+                        let param = new URLSearchParams()
+                        param.append('username',this.loginForm.username)
+                        param.append('password',this.loginForm.password)
+                        axios.post('http://127.0.0.1:8000/itaim/login',param)
                             .then(response => {
                                 this.loading = false;
                                 let code = response.data;
-                                if(code.success === true){
+                                if(code.success === "true"){
                                     /*存储到ls*/
                                     localStorage.setItem('eleToken',code.token);
                                     console.log('eleToken');
-                                    this.$router.push('/ListAsset');
+                                    this.$router.push('/ListUser');
                                 }else {
                                     this.$alert('用户名或密码错误!','提示', {
                                         confirmButtonText: '确定',
                                         callback: action => {
                                             this.reload();
-                                            // window.location.reload()
                                         }
                                     });
                                 }

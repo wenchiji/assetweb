@@ -5,6 +5,8 @@
     根据资产编号查询：
     <el-input v-model="assetNumber" style="width: 20%" placeholder="请输入资产编号" @keyup.enter.native = "findByAssetNumber">根据资产编号查询</el-input>
     <br><br>
+    <el-button @click="handleEdit()" type="success" icon="el-icon-edit">新增</el-button>
+    &nbsp
     <el-button @click="bathAddAsset" type="success"
                :disabled="this.selectionList.length == 0">入库</el-button>
     &nbsp
@@ -73,6 +75,7 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button @click="resetForm('editForm')">重置</el-button>
+        <el-button type="primary" @click="addAsset">新 增</el-button>
         <el-button type="primary" @click="updateAsset">确 定</el-button>
       </div>
     </el-dialog>
@@ -94,37 +97,49 @@
       selectionChange(val){
         this.selectionList = val
       },
-      // getList(that){
-      //   axios.get('http://localhost:8090/listAsset/'+that.currentPage+'/10').then(function (response) {
-      //     that.tableData = response.data.content
-      //     that.total = response.data.totalElements
-      //   })
-      // },
+      getList(that){
+        axios.get(this.baseUrl+'/listAsset/', {
+          params: {
+            page: that.currentPage,
+            pagesize: that.pageSize
+          }
+        }).then(function (response) {
+          that.tableData = response.data.assetList
+          that.total = response.data.totalElements
+        })
+      },
       listByStatus(command){
         const that = this
-        axios.request({
-          url: this.baseUrl+'/listByStatus',
+        axios.get(this.baseUrl+'/listByStatus/',{
           params:{
             status:command,
             page:that.currentPage,
-            size:10
+            pagesize:10
           }
         }).then((response) =>{
-          that.tableData = response.data.content
+          that.tableData = response.data.assetList
           that.total = response.data.totalElements
         })
       },
       findByJobNumber(){
         let i = parseInt(this.jobNumber)
         const that = this
-        axios.get(this.baseUrl+'/findByJobNumber?jobNumber='+i).then((response)=>{
-          that.tableData = response.data
+        axios.get(this.baseUrl+'/findByJobNumber/',{
+          params:{
+            jobNumber: i
+          }
+        }).then((response)=>{
+          that.tableData = response.data.content
           that.total = response.data.totalElements
         })
       },
       findByAssetNumber(){
         let str = this.assetNumber
-        axios.get(this.baseUrl+'/findByAssetNumber?assetNumber='+str).then((response)=>{
+        axios.get(this.baseUrl+'/findByAssetNumber/',{
+          params:{
+            assetNumber: str
+          }
+        }).then((response)=>{
           this.tableData = response.data
           this.total = response.data.totalElements
         })
@@ -133,10 +148,41 @@
         this.dialogFormVisible = true;
         this.editForm = Object.assign({},row);
       },
+      addAsset(){
+        let param = new URLSearchParams()
+        param.append('id', this.editForm.id),
+        param.append('jobNumber', this.editForm.jobNumber),
+        param.append('deviceName', this.editForm.deviceName),
+        param.append('assetNumber', this.editForm.assetNumber),
+        param.append('status', this.editForm.status),
+        axios.post('http://127.0.0.1:8000/itaim/addAsset/',param).then((response)=>{
+          if(response.data.success == "true"){
+            this.$alert('添加成功!','提示', {
+              confirmButtonText: '确定',
+              callback: action => {
+                this.reload();
+              }
+            });
+          }else {
+            this.$alert('添加失败!','提示', {
+              confirmButtonText: '确定',
+              callback: action => {
+                this.reload();
+              }
+            });
+          }
+        })
+      },
       updateAsset(){
-        let para = Object.assign({},this.editForm);
-        axios.post(this.baseUrl+'/updateAsset',para).then((response)=>{
-          if(response.data.success == true){
+        // let para = Object.assign({},this.editForm);
+        let param = new URLSearchParams()
+        param.append('id', this.editForm.id),
+        param.append('jobNumber', this.editForm.jobNumber),
+        param.append('deviceName', this.editForm.deviceName),
+        param.append('assetNumber', this.editForm.assetNumber),
+        param.append('status', this.editForm.status),
+        axios.post(this.baseUrl+'/updateAsset/',param).then((response)=>{
+          if(response.data.success == 'true'){
             this.$alert('资产信息修改成功!','提示', {
               confirmButtonText: '确定',
               callback: action => {
@@ -150,18 +196,31 @@
         this.$refs[formName].resetFields();
       },
       deleteAsset(row){
+        let param = new URLSearchParams()
+        param.append('id', row.id)
         this.$confirm('此操作将永久删除所选中信息, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.delete(this.baseUrl+'/deleteAsset/?id='+row.id)
-          this.$alert('删除成功!','提示', {
-            confirmButtonText: '确定',
-            callback: action => {
-              this.reload();
-            }
-          });
+          axios.post(this.baseUrl+'/deleteAsset/',param)
+                  .then((response)=>{
+                    if(response.data.success == "true"){
+                      this.$alert('删除成功!','提示', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                          this.reload();
+                        }
+                      });
+                    }else {
+                      this.$alert('删除失败!','提示', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                          this.reload();
+                        }
+                      });
+                    }
+                  })
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -171,17 +230,18 @@
       },
       bathDeleteAsset() {
         let assetIds = this.selectionList.map(item => item.id).join()
+        let param = new URLSearchParams()
+        param.append('ids', assetIds)
         this.$confirm('此操作将永久删除所选中信息, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.post(this.baseUrl+'/bathDeleteAsset/?assetIds=' + assetIds)
+          axios.post(this.baseUrl+'/bathDeleteAsset/', param)
           this.$alert('删除成功!','提示', {
             confirmButtonText: '确定',
             callback: action => {
               this.reload(); //调用注入的方法达到刷新router-view的目的
-              // window.location.reload()
             }
           });
           this.listByStatus("否");
@@ -197,17 +257,16 @@
           confirmButtonText: '确定',
           cancelButtonText: '取消',
         }).then(({ value }) => {
-          axios.post(this.baseUrl+'/addAsset/?ids=' + row.id).then(response=> {
-            if(response.data.code === 1){
-              // this.$message({
-              //   type: 'success',
-              //   message: '入库成功!'
-              // })
+          axios.get(this.baseUrl+'/addToOa/',{
+            params:{
+              ids: row.id
+            }
+          }).then(response=> {
+            if(response.data.success === "true"){
               this.$alert('入库成功!','提示', {
                 confirmButtonText: '确定',
                 callback: action => {
                   this.reload(); //调用注入的方法达到刷新router-view的目的
-                  // window.location.reload()
                 }
               });
               axios.post(this.baseUrl+'/updateAssetStatus/?ids=' + row.id)
@@ -216,7 +275,6 @@
                 confirmButtonText: '确定',
                 type: 'warning'
               })
-              // console.log(response.data.msg)
             }
           })
         }).catch(() => {
@@ -235,15 +293,10 @@
         }).then(() => {
           axios.post(this.baseUrl+'/addAsset/?ids=' + ids).then(response=> {
             if(response.data.code === 1){
-              // this.$message({
-              //   type: 'success',
-              //   message: '入库成功!'
-              // })
               this.$alert('入库成功!','提示', {
                 confirmButtonText: '确定',
                 callback: action => {
                   this.reload(); //调用注入的方法达到刷新router-view的目的
-                  // window.location.reload()
                 }
               });
               axios.post(this.baseUrl+'/updateAssetStatus/?ids=' + ids)
@@ -252,7 +305,6 @@
                 confirmButtonText: '确定',
                 type: 'warning'
               })
-              // console.log(response.data.msg)
             }
           })
         }).catch(() => {
@@ -270,7 +322,7 @@
     },
     data() {
       return {
-        baseUrl: 'http://10.2.10.22:8090',
+        baseUrl: 'http://127.0.0.1:8000/itaim',
         input:'',
         jobNumber:'',
         assetNumber:'',

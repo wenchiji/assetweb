@@ -20,7 +20,6 @@
                     </el-dropdown>
                     <span>管理员</span>
                     &nbsp
-<!--                    <el-button @click="logout">退出</el-button>-->
                 </el-header>
                 <el-main>
                     <router-view v-if="isRouterAlive"></router-view>

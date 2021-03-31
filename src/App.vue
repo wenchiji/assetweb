@@ -28,11 +28,6 @@
       }
     },
     data() {
-      // const item = {
-      //   date: '',
-      //   name: '',
-      //   address: ''
-      // };
       return {
         // tableData: Array(20).fill(item),
         isRouterAlive: true

@@ -1,8 +1,8 @@
 <template>
     <div id="app">
         <el-form style="width: 40%" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="用户名" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
+        <el-form-item label="用户名" prop="username">
+            <el-input v-model="ruleForm.username"></el-input>
         </el-form-item>
         <el-form-item label="联系电话" prop="phone">
             <el-input v-model="ruleForm.phone"></el-input>
@@ -26,7 +26,7 @@
         data() {
             return {
                 ruleForm: {
-                    name: '',
+                    username: '',
                     phone: '',
                     password: ''
                 },
@@ -37,7 +37,7 @@
                     ],
                     phone: [
                         { required: true, message: '请输入联系电话', trigger: 'blur' },
-                        { min: 11, max: 11, message: '长度为11个字符', trigger: 'blur' }
+                        { min: 8, max: 11, message: '长度为8-11个字符', trigger: 'blur' }
                     ],
                     password: [
                         { required: true, message: '请输入登陆密码', trigger: 'blur' },
@@ -48,12 +48,16 @@
         },
         methods: {
             submitForm(formName) {
-                const this1 = this
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        axios.post('http://10.2.10.22:8090/register',this.ruleForm).then(function(response){
-                            if(response.data.success === true){
-                                this1.$alert('用户 '+this1.ruleForm.name+' 添加成功!','提示', {
+                        let param = new URLSearchParams()
+                        param.append('username', this.ruleForm.username)
+                        param.append('phone', this.ruleForm.phone)
+                        param.append('password', this.ruleForm.password)
+                        axios.post('http://127.0.0.1:8000/itaim/register/',param)
+                            .then(function(response){
+                            if(response.data.success === "true"){
+                                this.$alert('用户 '+param.username+' 添加成功!','提示', {
                                     confirmButtonText: '确定',
                                     callback: action => {
                                         this.reload();
