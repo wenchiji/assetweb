@@ -262,16 +262,18 @@
               ids: row.id
             }
           }).then(response=> {
-            if(response.data.success === "true"){
+            if(response.data.result.code === 1){
               this.$alert('入库成功!','提示', {
                 confirmButtonText: '确定',
                 callback: action => {
                   this.reload(); //调用注入的方法达到刷新router-view的目的
                 }
               });
-              axios.post(this.baseUrl+'/updateAssetStatus/?ids=' + row.id)
+              let param = new URLSearchParams()
+              param.append('ids', row.id),
+              axios.post(this.baseUrl+'/updateAssetStatus/',param)
             }else{
-              this.$confirm(response.data.msg, '入库失败', {
+              this.$confirm(response.data.result.msg, '入库失败', {
                 confirmButtonText: '确定',
                 type: 'warning'
               })
@@ -296,16 +298,18 @@
               ids: ids
             }
           }).then(response=> {
-            if(response.data.code === 1){
+            if(response.data.result.code === 1){
               this.$alert('入库成功!','提示', {
                 confirmButtonText: '确定',
                 callback: action => {
                   this.reload(); //调用注入的方法达到刷新router-view的目的
                 }
               });
-              axios.post(this.baseUrl+'/updateAssetStatus/?ids=' + ids)
+              let param = new URLSearchParams()
+              param.append('ids', ids),
+              axios.post(this.baseUrl+'/updateAssetStatus/',param)
             }else{
-              this.$confirm(response.data.msg, '入库失败', {
+              this.$confirm(response.data.result.msg, '入库失败', {
                 confirmButtonText: '确定',
                 type: 'warning'
               })

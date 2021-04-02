@@ -66,7 +66,7 @@
                                     /*存储到ls*/
                                     localStorage.setItem('eleToken',code.token);
                                     console.log('eleToken');
-                                    this.$router.push('/ListUser');
+                                    this.$router.push('/ListAsset');
                                 }else {
                                     this.$alert('用户名或密码错误!','提示', {
                                         confirmButtonText: '确定',

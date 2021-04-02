@@ -140,17 +140,22 @@
         this.editForm = Object.assign({},row);
       },
       updateAsset(){
-        let para = Object.assign({},this.editForm);
-        axios.post(this.baseUrl+'/updateAsset',para).then((response)=>{
-          if(response.data.success == true){
-            this.$alert('资产信息修改成功!','提示', {
-              confirmButtonText: '确定',
-              callback: action => {
-                this.reload();
-              }
-            });
-          }
-        })
+        let param = new URLSearchParams()
+        param.append('id', this.editForm.id),
+                param.append('jobNumber', this.editForm.jobNumber),
+                param.append('deviceName', this.editForm.deviceName),
+                param.append('assetNumber', this.editForm.assetNumber),
+                param.append('status', this.editForm.status),
+                axios.post(this.baseUrl+'/updateAsset/',param).then((response)=>{
+                  if(response.data.success == 'true'){
+                    this.$alert('资产信息修改成功!','提示', {
+                      confirmButtonText: '确定',
+                      callback: action => {
+                        this.reload();
+                      }
+                    });
+                  }
+                })
       },
       resetForm(formName) {
         this.$refs[formName].resetFields();
@@ -187,7 +192,6 @@
             confirmButtonText: '确定',
             callback: action => {
               this.reload(); //调用注入的方法达到刷新router-view的目的
-              // window.location.reload()
             }
           });
           this.listByStatus("否");
