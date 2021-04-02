@@ -129,7 +129,7 @@
             jobNumber: i
           }
         }).then((response)=>{
-          that.tableData = response.data.content
+          that.tableData = response.data.assetList
           that.total = response.data.totalElements
         })
       },
@@ -140,7 +140,7 @@
             assetNumber: str
           }
         }).then((response)=>{
-          this.tableData = response.data
+          this.tableData = response.data.assetList
           this.total = response.data.totalElements
         })
       },
@@ -291,7 +291,11 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.post(this.baseUrl+'/addAsset/?ids=' + ids).then(response=> {
+          axios.get(this.baseUrl+'/addToOa/',{
+            params:{
+              ids: ids
+            }
+          }).then(response=> {
             if(response.data.code === 1){
               this.$alert('入库成功!','提示', {
                 confirmButtonText: '确定',

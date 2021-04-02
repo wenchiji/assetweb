@@ -61,7 +61,7 @@
             //设置超时退出
             var lastTime = new Date().getTime();
             var currentTime = new Date().getTime();
-            var timeOut = 30 * 60 * 1000; //设置超时时间： 10分
+            var timeOut = 30 * 60 * 1000; //设置超时时间
 
             $(function(){
                 /* 鼠标移动事件 */

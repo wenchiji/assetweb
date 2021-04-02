@@ -80,8 +80,9 @@
                     params:{
                         username: this.name
                     }
-                }).then(response => {
-                    this.tableData = response.data.content
+                }).then((response)=>{
+                    this.tableData = response.data.userList
+                    this.total = response.data.totalElements
                 })
             },
             //批量选择时触发

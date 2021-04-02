@@ -99,6 +99,19 @@
           that.total = response.data.totalElements
         })
       },
+      listByStatus(command){
+        const that = this
+        axios.get(this.baseUrl+'/listByStatus/',{
+          params:{
+            status:command,
+            page:that.currentPage,
+            pagesize:10
+          }
+        }).then((response) =>{
+          that.tableData = response.data.assetList
+          that.total = response.data.totalElements
+        })
+      },
       findByJobNumber(){
         let i = parseInt(this.jobNumber)
         const that = this
@@ -107,14 +120,18 @@
             jobNumber: i
           }
         }).then((response)=>{
-          that.tableData = response.data.content
+          that.tableData = response.data.assetList
           that.total = response.data.totalElements
         })
       },
       findByAssetNumber(){
         let str = this.assetNumber
-        axios.get(this.baseUrl+'/findByAssetNumber?assetNumber='+str).then((response)=>{
-          this.tableData = response.data
+        axios.get(this.baseUrl+'/allAsset/findByAssetNumber/',{
+          params:{
+            assetNumber: str
+          }
+        }).then((response)=>{
+          this.tableData = response.data.assetList
           this.total = response.data.totalElements
         })
       },
